@@ -27,7 +27,6 @@ def predict():
     try:
         data = request.get_json()
 
-        # Get Inputs
         age = float(data['age'])
         income = float(data['income'])
         loan = float(data['loan'])
@@ -36,8 +35,7 @@ def predict():
         education = float(data['education'])
         housing = float(data['housing'])
 
-        # Convert to DataFrame (IMPORTANT)
-        features = pd.DataFrame([[
+        features = np.array([[
             age,
             income,
             loan,
@@ -45,31 +43,19 @@ def predict():
             employment,
             education,
             housing
-        ]], columns=[
-            'Age',
-            'Income',
-            'Loan_Amount',
-            'Credit_Score',
-            'Employment_Years',
-            'Education_Level',
-            'Housing_Status'
-        ])
+        ]])
 
-        # Apply Scaling
+        # Scale
         features = scaler.transform(features)
 
-        # Prediction
+        # Predict
         prediction = model.predict(features)
         predicted_value = int(prediction[0])
 
-        # Result Message
         if predicted_value == 1:
             status = "Successful ✅"
         else:
             status = "Fail ❌"
-
-        print("Prediction:", predicted_value)
-        print("Status:", status)
 
         return jsonify({
             "prediction": predicted_value,
