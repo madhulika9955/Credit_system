@@ -124,14 +124,9 @@ let employment = document.getElementById("employment").value
 let education = document.getElementById("education").value
 let housing = document.getElementById("housing").value
 
-if(age=="" || income=="" || loan=="" || credit=="" || employment=="" || education=="" || housing==""){
-alert("Please fill all fields")
-return
-}
-
 document.getElementById("result").innerHTML="Predicting..."
 
-fetch("http://127.0.0.1:5000/predict",{
+fetch("/predict",{
 
 method:"POST",
 
@@ -151,23 +146,40 @@ housing:housing
 
 })
 
-.then(response=>response.json())
+.then(response => response.json())
 
-.then(data=>{
+.then(data => {
+
+console.log("Response:", data)
+
+if(data.error){
+alert("Error : " + data.error)
+return
+}
 
 document.getElementById("result").innerHTML =
 "Predicted Value : " + data.prediction +
 "<br>Result : " + data.status
 
-alert("Predicted Value : " + data.prediction +
-"\nResult : " + data.status)
+alert(
+"Predicted Value : " + data.prediction +
+"\nResult : " + data.status
+)
+
+})
+
+.catch(error => {
+
+console.log("Fetch Error:", error)
+
+document.getElementById("result").innerHTML =
+"Server Error"
 
 })
 
 }
 
 </script>
-
 </body>
 
 </html>
