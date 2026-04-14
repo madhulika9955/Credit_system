@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import pickle
 import numpy as np
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -15,7 +16,7 @@ def home():
 # Load Model
 model = pickle.load(open("credit_model.pkl", "rb"))
 
-# Load Scaler (IMPORTANT)
+# Load Scaler
 scaler = pickle.load(open("scaler.pkl", "rb"))
 
 
@@ -35,8 +36,8 @@ def predict():
         education = float(data['education'])
         housing = float(data['housing'])
 
-        # Feature Order Must Match Training
-        features = np.array([[
+        # Convert to DataFrame (IMPORTANT)
+        features = pd.DataFrame([[
             age,
             income,
             loan,
@@ -44,21 +45,31 @@ def predict():
             employment,
             education,
             housing
-        ]])
+        ]], columns=[
+            'Age',
+            'Income',
+            'Loan_Amount',
+            'Credit_Score',
+            'Employment_Years',
+            'Education_Level',
+            'Housing_Status'
+        ])
 
-        # Apply Scaling (IMPORTANT FIX)
+        # Apply Scaling
         features = scaler.transform(features)
 
         # Prediction
         prediction = model.predict(features)
-
         predicted_value = int(prediction[0])
 
         # Result Message
         if predicted_value == 1:
-            status = "Sucessful ✅"
+            status = "Successful ✅"
         else:
             status = "Fail ❌"
+
+        print("Prediction:", predicted_value)
+        print("Status:", status)
 
         return jsonify({
             "prediction": predicted_value,
@@ -66,7 +77,10 @@ def predict():
         })
 
     except Exception as e:
+        print("Error:", str(e))
         return jsonify({
+            "prediction": None,
+            "status": "Error",
             "error": str(e)
         })
 
